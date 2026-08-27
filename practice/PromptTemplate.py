@@ -3,6 +3,16 @@ from dotenv import load_dotenv
 import os
 load_dotenv(encoding="utf-8")
 API_KEY = os.getenv("DEEPSEEK_API_KEY")
+from langchain.chat_models import init_chat_model
+
+model = init_chat_model(
+      model="deepseek-chat",
+      model_provider="openai",
+      api_key=API_KEY,
+      base_url="https://api.deepseek.com",
+      max_tokens=300,
+      temperature=0.6,
+)
 
 # 方法1
 template = PromptTemplate(
