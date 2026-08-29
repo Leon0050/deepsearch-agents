@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from loguru import logger
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableBranch
+from langchain_core.runnables import RunnableBranch, RunnableParallel
 
 load_dotenv(encoding="utf-8")
 
@@ -98,3 +98,35 @@ for query_input in test_queries:
 # 2026-03-06 10:15:57.031 | INFO     | __main__:<module>:94 - 输出结果: Nice to meet you.
 
 """
+prompt1 = ChatPromptTemplate.from_messages(
+    [
+        ("system", "你是一个知识渊博的计算机专家，请用中文简短回答"),
+        ("human", "请简短介绍什么是{topic}"),
+    ]
+)
+parser1 = StrOutputParser()
+chain1 = prompt1 | model | parser1
+
+# 子链 2：英文简短介绍（与 chain1 同结构，仅提示词语言不同）
+prompt2 = ChatPromptTemplate.from_messages(
+    [
+        ("system", "你是一个知识渊博的计算机专家，请用英文简短回答"),
+        ("human", "请简短介绍什么是{topic}"),
+    ]
+)
+parser2 = StrOutputParser()
+chain2 = prompt2 | model | parser2
+
+# RunnableParallel：同一输入会同时喂给多个子链，结果按键汇总为 dict
+parallel_chain = RunnableParallel({"chinese": chain1, "english": chain2})
+
+parallel_chain = RunnableParallel(
+    {"chinese":chain1,
+     "english":chain2
+     }
+)
+
+# parallel_chain = RunnableParallel({
+#     "chinese":chain1,
+#     "english":chain2
+# })
