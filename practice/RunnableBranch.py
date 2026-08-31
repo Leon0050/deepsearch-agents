@@ -1,3 +1,4 @@
+from typing import Any
 from langchain.chat_models import init_chat_model
 import os
 from dotenv import load_dotenv
@@ -130,3 +131,51 @@ parallel_chain = RunnableParallel(
 #     "chinese":chain1,
 #     "english":chain2
 # })
+# 一次 invoke，返回 {"chinese": "...", "english": "..."}
+result = parallel_chain.invoke({"topic": "langchain"})
+logger.info(result)
+
+# 可选：打印并行链的 ASCII 图结构，便于理解“并行节点 + 汇总输出”的数据流
+parallel_chain.get_graph().print_ascii()
+
+"""
+【输出示例】
+2026-03-06 10:28:37.853 | INFO     | __main__:<module>:54 - {'chinese': 'LangChain 是一个开源框架，用于构建基于大语言模型（LLM）的应用程序。它提供模块化组件（如链（Chains）、提示模板、记忆（Memory）、工具（Tools）和数据连接器），帮助开发者轻松实现提示工程、外部数据检索（RAG）、多步推理、对话状态管理等功能，提升 LLM 应用的可控性、可扩展性和实用性。', 'english': 'LangChain is a framework for developing applications powered by large language models (LLMs), enabling chaining of prompts, LLM calls, and external tools (e.g., APIs, databases) to build complex, stateful, and context-aware workflows.'}
+            +--------------------------------+
+            | Parallel<chinese,english>Input |
+            +--------------------------------+
+                   ***               ***
+                ***                     ***
+              **                           **
++--------------------+              +--------------------+
+| ChatPromptTemplate |              | ChatPromptTemplate |
++--------------------+              +--------------------+
+           *                                   *
+           *                                   *
+           *                                   *
+    +------------+                      +------------+
+    | ChatOpenAI |                      | ChatOpenAI |
+    +------------+                      +------------+
+           *                                   *
+           *                                   *
+           *                                   *
+  +-----------------+                 +-----------------+
+  | StrOutputParser |                 | StrOutputParser |
+  +-----------------+                 +-----------------+
+                   ***               ***
+                      ***         ***
+                         **     **
+            +---------------------------------+
+            | Parallel<chinese,english>Output |
+            +---------------------------------+
+"""
+
+from langchain_core.runnables import RunnableLambda
+
+def debug_print(x):
+    print(x)
+    return {"input": x}
+chain = chain1 | RunnableLambda[Any, dict[str, Any]](debug_print)| chain2
+
+
+
