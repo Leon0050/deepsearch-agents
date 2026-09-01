@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv(encoding="utf-8")
-import os, redis
+import os, redis_stack
 from loguru import logger
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
