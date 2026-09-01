@@ -32,13 +32,11 @@ try:
     USE_LANGCHAIN_REDIS = True
 except ModuleNotFoundError:
     from langchain_community.chat_message_histories import RedisChatMessageHistory
-
     USE_LANGCHAIN_REDIS = False
 
 # 默认连接 Redis Stack（端口 26379）；可通过环境变量 REDIS_URL 覆盖
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:26379")
 FORCE_SAVE = os.getenv("REDIS_FORCE_SAVE", "0") == "1"
-
 
 def _check_redis():
     """启动时检查 Redis/Redis Stack 是否可达，不可达时给出明确提示后退出。"""
@@ -83,7 +81,7 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
     if USE_LANGCHAIN_REDIS:
         return RedisChatMessageHistory(
             session_id=session_id,
-            redis_url=REDIS_URL,
+            redis_url=REDIS_URL
         )
     return RedisChatMessageHistory(
         session_id=session_id,
